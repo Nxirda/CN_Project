@@ -14,7 +14,8 @@
 # Follow the example of the machine called "ambre" in the 
 # file ambre.mk
 #
-HOSTNAME=$(shell hostname)
+#HOSTNAME=$(shell hostname)
+HOSTNAME=Myrkr
 include $(HOSTNAME).mk
 
 # 

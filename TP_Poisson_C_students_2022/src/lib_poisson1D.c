@@ -5,21 +5,61 @@
 /**********************************************/
 #include "lib_poisson1D.h"
 
-void set_GB_operator_colMajor_poisson1D(double* AB, int *lab, int *la, int *kv){
+//
+void set_GB_operator_colMajor_poisson1D(double* AB, int *lab, int *la, int *kv)
+{
+  for(int i = 0; i < *lab; i++)
+  {
+    for(int j = 0; j < *la; j++)
+    {
+      if(i < *kv)
+      {
+        AB[j, i] = 0;
+      }
+      else
+      {
+        AB[j, i] = 1;
+      }
+    }
+  }
 }
 
-void set_GB_operator_colMajor_poisson1D_Id(double* AB, int *lab, int *la, int *kv){
+//
+void set_GB_operator_colMajor_poisson1D_Id(double* AB, int *lab, int *la, int *kv)
+{
+
 }
 
-void set_dense_RHS_DBC_1D(double* RHS, int* la, double* BC0, double* BC1){
+//
+void set_dense_RHS_DBC_1D(double* RHS, int* la, double* BC0, double* BC1)
+{
+  RHS[0] = *BC0;
+  for(int i = 1; i < *la; i++)
+  {
+    RHS[i] = 0;
+  }
+  RHS[(*la)-1] = *BC1;
 }  
 
-void set_analytical_solution_DBC_1D(double* EX_SOL, double* X, int* la, double* BC0, double* BC1){
+//
+void set_analytical_solution_DBC_1D(double* EX_SOL, double* X, int* la, double* BC0, double* BC1)
+{
+  double diff = (*BC1 - *BC0);
+  for(int i = 0; i < *la; i++)
+  {
+    EX_SOL[i] = *BC0 + X[i] * diff;
+  }
 }  
 
-void set_grid_points_1D(double* x, int* la){
+//
+void set_grid_points_1D(double* X, int* la){
+  for(int i = 0; i < *la; i++)
+  {
+    X[i] = ((double)i)/(*la);
+  }
 }
 
+//
 void write_GB_operator_rowMajor_poisson1D(double* AB, int* lab, int* la, char* filename){
   FILE * file;
   int ii,jj;
@@ -39,6 +79,7 @@ void write_GB_operator_rowMajor_poisson1D(double* AB, int* lab, int* la, char* f
   }
 }
 
+//
 void write_GB_operator_colMajor_poisson1D(double* AB, int* lab, int* la, char* filename){
   FILE * file;
   int ii,jj;
@@ -58,6 +99,7 @@ void write_GB_operator_colMajor_poisson1D(double* AB, int* lab, int* la, char* f
   }
 }
 
+//
 void write_GB2AIJ_operator_poisson1D(double* AB, int* la, char* filename){
   FILE * file;
   int jj;
@@ -80,6 +122,7 @@ void write_GB2AIJ_operator_poisson1D(double* AB, int* la, char* filename){
   }
 }
 
+//
 void write_vec(double* vec, int* la, char* filename){
   int jj;
   FILE * file;
@@ -96,6 +139,7 @@ void write_vec(double* vec, int* la, char* filename){
   } 
 }  
 
+//
 void write_xy(double* vec, double* x, int* la, char* filename){
   int jj;
   FILE * file;
@@ -112,9 +156,12 @@ void write_xy(double* vec, double* x, int* la, char* filename){
   } 
 }  
 
+//
 int indexABCol(int i, int j, int *lab){
   return 0;
 }
+
+//
 int dgbtrftridiag(int *la, int*n, int *kl, int *ku, double *AB, int *lab, int *ipiv, int *info){
   return *info;
 }

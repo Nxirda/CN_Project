@@ -27,7 +27,7 @@ int main(int argc,char *argv[])
   NRHS=1;
   nbpoints=10;
   la=nbpoints-2;
-  T0=-5.0;
+  T0=-5.0;  
   T1=5.0;
 
   printf("--------- Poisson 1D ---------\n\n");
@@ -52,14 +52,15 @@ int main(int argc,char *argv[])
   AB = (double *) malloc(sizeof(double)*lab*la);
 
   set_GB_operator_colMajor_poisson1D(AB, &lab, &la, &kv);
-
-  // write_GB_operator_colMajor_poisson1D(AB, &lab, &la, "AB.dat");
+  
+  write_GB_operator_colMajor_poisson1D(AB, &lab, &la, "AB.dat");
 
   printf("Solution with LAPACK\n");
   /* LU Factorization */
   info=0;
   ipiv = (int *) calloc(la, sizeof(int));
   dgbtrf_(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
+  // NEED 1 MORE LIGNE TO STORE TMP VALUES
 
   /* LU for tridiagonal matrix  (can replace dgbtrf_) */
   // ierr = dgbtrftridiag(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
@@ -67,12 +68,12 @@ int main(int argc,char *argv[])
   // write_GB_operator_colMajor_poisson1D(AB, &lab, &la, "LU.dat");
   
   /* Solution (Triangular) */
-  if (info==0){
+  /* if (info==0){
     dgbtrs_("N", &la, &kl, &ku, &NRHS, AB, &lab, ipiv, RHS, &la, &info);
     if (info!=0){printf("\n INFO DGBTRS = %d\n",info);}
   }else{
     printf("\n INFO = %d\n",info);
-  }
+  }  */
 
   /* It can also be solved with dgbsv */
   // TODO : use dgbsv
