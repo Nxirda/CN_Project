@@ -8,20 +8,22 @@
 //
 void set_GB_operator_colMajor_poisson1D(double* AB, int *lab, int *la, int *kv)
 {
-  for(int i = 0; i < *lab; i++)
+  for(int i = 0; i < (*la); i++)
   {
-    for(int j = 0; j < *la; j++)
-    {
-      if(i < *kv)
-      {
-        AB[j, i] = 0;
-      }
-      else
-      {
-        AB[j, i] = 1;
-      }
-    }
-  }
+    AB[(*kv) +1 +i*(*lab)] = 2.0;
+
+    //Lower diagonal
+    if(i != 0)
+      AB[(*kv + i*(*lab))] = -1;
+    else
+      AB[(*kv + i*(*lab))] = 2;
+
+    //Upper diagonal
+    if(i != (*la) -1)
+      AB[(*kv) +2 + i*(*lab)] = -1;
+    else
+      AB[(*kv) +2 + i*(*lab)] = 2; 
+  } 
 }
 
 //

@@ -52,7 +52,7 @@ int main(int argc,char *argv[])
   AB = (double *) malloc(sizeof(double)*lab*la);
 
   set_GB_operator_colMajor_poisson1D(AB, &lab, &la, &kv);
-  
+
   write_GB_operator_colMajor_poisson1D(AB, &lab, &la, "AB.dat");
 
   printf("Solution with LAPACK\n");
@@ -60,7 +60,6 @@ int main(int argc,char *argv[])
   info=0;
   ipiv = (int *) calloc(la, sizeof(int));
   dgbtrf_(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
-  // NEED 1 MORE LIGNE TO STORE TMP VALUES
 
   /* LU for tridiagonal matrix  (can replace dgbtrf_) */
   // ierr = dgbtrftridiag(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
