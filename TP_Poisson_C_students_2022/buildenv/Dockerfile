@@ -1,5 +1,5 @@
-# Utilisation de l'image Debian
-FROM ubuntu:latest
+# Utilisation de l'image Ubuntu
+FROM ubuntu:20.04
 
 # Mise à jour des packages et installation des dépendances
 RUN apt-get update
@@ -11,3 +11,4 @@ RUN apt-get install liblapack-dev -y
 
 VOLUME /root/env
 WORKDIR /root/env
+ENV HOSTNAME=docker
