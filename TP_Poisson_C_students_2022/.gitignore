@@ -53,3 +53,4 @@ dkms.conf
 
 #Specific to the project
 core
+*.dat
