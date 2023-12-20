@@ -69,11 +69,15 @@ int main(int argc,char *argv[])
   write_vec(RHS, &la, "RHS.dat");
   //Méthode de validation : erreur avant/erreur arrière
   printf("Solution with LAPACK\n");
+
   /* LU Factorization */
   info=0;
   ipiv = (int *) calloc(la, sizeof(int));
   dgbtrf_(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
-  dgbtrs_("N", &la, &kl, &ku, &NRHS, AB, &lab, ipiv, X, &lab, &info, 0);
+
+  //Chose one of the two
+  dgbtrs_("N", &la, &kl, &ku, &NRHS, AB, &lab, ipiv, X, &la, &info, 0);
+  //dgbsv_(&la, &kl, &ku, &NRHS, AB, &lab, ipiv, X, &lab, &info);
 
   /* LU for tridiagonal matrix  (can replace dgbtrf_) */
   // ierr = dgbtrftridiag(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
