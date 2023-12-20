@@ -14,15 +14,11 @@ void set_GB_operator_colMajor_poisson1D(double* AB, int *lab, int *la, int *kv)
 
     //Lower diagonal
     if(i != 0)
-      AB[(*kv + i*(*lab))] = -1;
-    else
-      AB[(*kv + i*(*lab))] = 2;
+      AB[((*kv) + i*(*lab))] = -1;
 
     //Upper diagonal
     if(i != (*la) -1)
       AB[(*kv) +2 + i*(*lab)] = -1;
-    else
-      AB[(*kv) +2 + i*(*lab)] = 2; 
   } 
 }
 
@@ -47,7 +43,7 @@ void set_dense_RHS_DBC_1D(double* RHS, int* la, double* BC0, double* BC1)
 void set_analytical_solution_DBC_1D(double* EX_SOL, double* X, int* la, double* BC0, double* BC1)
 {
   double diff = (*BC1 - *BC0);
-  for(int i = 0; i < *la; i++)
+  for(int i = 0; i < (*la); i++)
   {
     EX_SOL[i] = *BC0 + X[i] * diff;
   }
