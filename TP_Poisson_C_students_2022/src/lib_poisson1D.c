@@ -26,11 +26,13 @@ void set_GB_operator_colMajor_poisson1D(double* AB, int *lab, int *la, int *kv)
 void set_GB_operator_colMajor_poisson1D_Id(double* AB, int *lab, int *la, int *kv)
 {
   int ii, jj, kk;
-  for (jj=0;jj<(*la);jj++){
+  for (jj=0; jj<(*la); jj++)
+  {
     kk = jj*(*lab);
     if (*kv>=0){
-      for (ii=0;ii< *kv;ii++){
-	AB[kk+ii]=0.0;
+      for (ii=0; ii< *kv; ii++)
+      {
+	      AB[kk+ii]=0.0;
       }
     }
     AB[kk+ *kv]=0.0;
@@ -63,7 +65,8 @@ void set_analytical_solution_DBC_1D(double* EX_SOL, double* X, int* la, double* 
 }  
 
 //
-void set_grid_points_1D(double* X, int* la){
+void set_grid_points_1D(double* X, int* la)
+{
   double h = 1.0/(1.0 * ((*la)+1));
   for(int i = 0; i < *la; i++)
   {
@@ -72,9 +75,10 @@ void set_grid_points_1D(double* X, int* la){
 }
 
 //USE LAPACK/BLAS HERE
-double relative_forward_error(double* x, double* y, int* la){
-  double x_norm = cblas_dnrm2(1, x, 1);
-  double y_norm = cblas_dnrm2(1, y, 1);
+double relative_forward_error(double* x, double* y, int* la)
+{
+  double x_norm = cblas_dnrm2((*la), x, 1);
+  double y_norm = cblas_dnrm2((*la), y, 1);
   
   double result = y_norm - x_norm;
 
@@ -83,11 +87,46 @@ double relative_forward_error(double* x, double* y, int* la){
 }
 
 //
-int indexABCol(int i, int j, int *lab){
+int indexABCol(int i, int j, int *lab)
+{
   return j*(*lab)+i;
 }
 
 //
-int dgbtrftridiag(int *la, int*n, int *kl, int *ku, double *AB, int *lab, int *ipiv, int *info){
+int dgbtrftridiag(int *la, int*n, int *kl, int *ku, double *AB, int *lab, int *ipiv, int *info)
+{
+  double m;
+
+  if((*la) != (*n) || (*kl) > 1 || (*ku) > 1)
+  {
+    (*info) = -1;
+  }
+  else
+  {
+    (*info) = 0;
+
+    for(int k = 0; k < (*n)-1; k++)
+    {
+      int i = k+1;
+      //printf("A(k,k) is %f\n", AB[indexABCol(2,k,lab)]);
+      printf("Iteration [%d]\n", k);
+      for(; i < (*n); i++)
+      {
+        //A(i,k) /= A(k,k)
+        //printf("A(i,k) is %f\n", AB[indexABCol(3,k,lab)]);
+        AB[indexABCol(3,k, lab)] /= AB[indexABCol(2,k,lab)];
+      }
+      for (i = k+1; i < (*n); i++) {
+        for (int j = k+1; j < (*n); j++) {
+
+            //A(i,j) -= A(i,k) * A(k,j)
+            //printf("A(i,j) is %f\n", AB[indexABCol(i,j,lab)]);
+            //printf("A(i,k) is %f\n", AB[indexABCol(i,k,lab)]);
+            //printf("A(k,j) is %f\n", AB[indexABCol(k,j,lab)]);
+            AB[indexABCol(1,j,lab)] -= AB[indexABCol(3,k,lab)] * AB[indexABCol(2,j,lab)];
+        }
+      } 
+    }
+  }
   return *info;
 }
