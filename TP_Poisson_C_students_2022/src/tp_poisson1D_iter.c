@@ -97,10 +97,10 @@ int main(int argc,char *argv[])
   /* Richardson General Tridiag */
 
   /* get MB (:=M, D for Jacobi, (D-E) for Gauss-seidel) */
-  kv = 1;
+  kv = 1; // ???? Why ????
   ku = 1;
   kl = 1;
-  MB = (double *) malloc(sizeof(double)*lab*la);
+  MB = (double *) malloc(sizeof(double) *lab *la);
 
   if (IMPLEM == JAC) 
   {

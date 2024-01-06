@@ -75,8 +75,8 @@ void extract_MB_jacobi_tridiag(double* AB, double* MB, int* lab, int* la, int* k
   for(int k = 0; k < (*la); k ++)
   {
     MB[indexABCol(0, k, lab)] = 0;
-    MB[indexABCol(1, k, lab)] = 0;
-    MB[indexABCol(2, k, lab)] = AB[indexABCol(1, k, lab)];
+    MB[indexABCol(1, k, lab)] = AB[indexABCol(1, k, lab)];
+    MB[indexABCol(2, k, lab)] = 0;
   }
 }
 
@@ -99,10 +99,11 @@ void extract_MB_gauss_seidel_tridiag(double *AB, double *MB, int *lab, int *la, 
 void richardson_MB(double *AB, double *RHS, double *X, double *MB, int *lab, int *la, int *ku, int *kl, double *tol, int *maxit, double *resvec, int *nbite)
 {
   int info = 1;
+  int NRHS = 1;
   int* ipiv = (int*)calloc((*la), sizeof(int));
-
+  int kub = 0;
   //On aura besoin de faire une Factorisation LU de M au début  
-  dgbtrf_(la, la, kl, ku, MB, lab, ipiv, &info);
+  dgbtrf_(la, la, kl, &kub, MB, lab, ipiv, &info);
 
   double* Y = (double*)calloc((*la), sizeof(double));
   cblas_dcopy((*la), RHS, 1, Y, 1);
@@ -114,17 +115,24 @@ void richardson_MB(double *AB, double *RHS, double *X, double *MB, int *lab, int
 
   double norm_res = cblas_dnrm2((*la), RHS, 1);
   resvec[0] = norm_res/residual;
-  int NRHS = (*lab);
-  //On aura besoin de faire une DGBTRS en début de chaque itération pour calculer
+
   while(cblas_dnrm2((*maxit), resvec, 1) > (*tol) && (*nbite) < (*maxit)) 
   {
-    dgbtrs_("N", la, kl, ku, &NRHS, MB, la, ipiv, AB, la, &info);
-    cblas_dcopy((*la), RHS, 1, Y, 1);
+    dgbtrs_("N", la, kl, &kub, &NRHS, MB, lab, ipiv, Y, la, &info);
+
+    //Here Y contains -(RHS) as values
+    cblas_daxpy((*la), -1, Y, 1, X, 1);
+    
+    //RHS with right sign
+    cblas_daxpy((*la), -1, RHS, 1, Y, 1);
+
     cblas_dgbmv(CblasColMajor, CblasNoTrans, *la, *la, *kl, *ku, 1, AB, *lab, X, 1, 1, Y, 1);
     
     norm_res = (cblas_dnrm2((*la), Y , 1));
-    (*nbite) ++;
     resvec[(*nbite)] = norm_res/residual;
+    (*nbite) ++;
   }
+  free(Y);
+  free(ipiv);
 }
 
