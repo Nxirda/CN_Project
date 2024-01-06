@@ -8,24 +8,53 @@
 //
 void set_GB_operator_colMajor_poisson1D(double* AB, int *lab, int *la, int *kv)
 {
-  for(int i = 0; i < (*la); i++)
+  int src = 0;
+
+  //Create KV columns of zeros
+  if(*kv >= 1)
   {
-    AB[(*kv) +1 +i*(*lab)] = 2.0;
+    src = (*kv);
+    for(int k = 0; k < (*la); k++)
+    {
+      for(int i = 0; i < (*kv) ; i++)
+      {
+        AB[indexABCol(i,k,lab)] = 0.0;
+      }
+    }
+  }
+
+  //Create actual poisson 1D matrix
+  for(int k = 0; k < (*la); k++)
+  {
+    AB[indexABCol(src+1,k,lab)] = 2.0;
 
     //Lower diagonal
-    if(i != 0)
-      AB[((*kv) + i*(*lab))] = -1;
-
+    if(k != 0)
+    {
+      AB[indexABCol(src,k,lab)] = -1.0;
+    }else
+    {
+      AB[indexABCol(src,k,lab)] = -0.0;
+    }
+    
     //Upper diagonal
-    if(i != (*la) -1)
-      AB[(*kv) +2 + i*(*lab)] = -1;
-  } 
+    if(k != (*la)-1)
+    {
+      AB[indexABCol(src+2,k,lab)] = -1.0;
+    }
+    else
+    {
+      AB[indexABCol(src+2,k,lab)] = 0.0;
+    }
+  }
 }
 
 //
 void set_GB_operator_colMajor_poisson1D_Id(double* AB, int *lab, int *la, int *kv)
 {
-  int ii, jj, kk;
+  int ii = 0;
+  int jj = 0;
+  int kk = 0;
   for (jj=0; jj<(*la); jj++)
   {
     kk = jj*(*lab);
@@ -74,7 +103,7 @@ void set_grid_points_1D(double* X, int* la)
   }
 }
 
-//USE LAPACK/BLAS HERE
+//
 double relative_forward_error(double* x, double* y, int* la)
 {
   double x_norm = cblas_dnrm2((*la), x, 1);
@@ -95,38 +124,27 @@ int indexABCol(int i, int j, int *lab)
 //
 int dgbtrftridiag(int *la, int*n, int *kl, int *ku, double *AB, int *lab, int *ipiv, int *info)
 {
-  double m;
-
   if((*la) != (*n) || (*kl) > 1 || (*ku) > 1)
   {
     (*info) = -1;
+    return -1;
   }
   else
   {
-    (*info) = 0;
+    
+    //Compute base for upper diagonal
+    AB[indexABCol(3,0,lab)] /= AB[indexABCol(2,0,lab)];
+    ipiv[0] = AB[indexABCol(2,0,lab)];
 
-    for(int k = 0; k < (*n)-1; k++)
+    for(int k = 1; k < (*n); k++)
     {
-      int i = k+1;
-      //printf("A(k,k) is %f\n", AB[indexABCol(2,k,lab)]);
-      printf("Iteration [%d]\n", k);
-      for(; i < (*n); i++)
-      {
-        //A(i,k) /= A(k,k)
-        //printf("A(i,k) is %f\n", AB[indexABCol(3,k,lab)]);
-        AB[indexABCol(3,k, lab)] /= AB[indexABCol(2,k,lab)];
-      }
-      for (i = k+1; i < (*n); i++) {
-        for (int j = k+1; j < (*n); j++) {
-
-            //A(i,j) -= A(i,k) * A(k,j)
-            //printf("A(i,j) is %f\n", AB[indexABCol(i,j,lab)]);
-            //printf("A(i,k) is %f\n", AB[indexABCol(i,k,lab)]);
-            //printf("A(k,j) is %f\n", AB[indexABCol(k,j,lab)]);
-            AB[indexABCol(1,j,lab)] -= AB[indexABCol(3,k,lab)] * AB[indexABCol(2,j,lab)];
-        }
-      } 
+      //Compute diag values
+      AB[indexABCol(2,k,lab)] -= AB[indexABCol(1,k,lab)] * AB[indexABCol(3,k-1,lab)];
+      ipiv[k] = AB[indexABCol(2,k,lab)];
+      //Compute upper diag value
+      AB[indexABCol(3,k,lab)] /= AB[indexABCol(2,k,lab)];
     }
+    (*info) = 0;
   }
   return *info;
 }

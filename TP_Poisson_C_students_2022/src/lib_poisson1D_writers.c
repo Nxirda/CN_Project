@@ -6,14 +6,17 @@
 #include "lib_poisson1D.h"
 
 void write_GB_operator_rowMajor_poisson1D(double* AB, int* lab, int* la, char* filename){
-  FILE * file;
-  int ii,jj;
+  FILE* file;
+  int ii = 0;
+  int jj = 0;
   file = fopen(filename, "w");
   //Numbering from 1 to la
   if (file != NULL){
-    for (ii=0;ii<(*lab);ii++){
-      for (jj=0;jj<(*la);jj++){
-	fprintf(file,"%lf\t",AB[ii*(*la)+jj]);
+    for (ii=0;ii<(*lab);ii++)
+    {
+      for (jj=0;jj<(*la);jj++)
+      {
+	      fprintf(file,"%lf\t",AB[ii*(*la)+jj]);
       }
       fprintf(file,"\n");
     }
@@ -26,19 +29,23 @@ void write_GB_operator_rowMajor_poisson1D(double* AB, int* lab, int* la, char* f
 
 void write_GB_operator_colMajor_poisson1D(double* AB, int* lab, int* la, char* filename){
   FILE * file;
-  int ii,jj;
+  int ii = 0;
+  int jj = 0;
   file = fopen(filename, "w");
   //Numbering from 1 to la
   if (file != NULL){
-    for (ii=0;ii<(*la);ii++){
-      for (jj=0;jj<(*lab);jj++){
-	fprintf(file,"%lf\t",AB[ii*(*lab)+jj]);
+    for (ii=0;ii<(*la);ii++)
+    {
+      for (jj=0;jj<(*lab);jj++)
+      { 
+        fprintf(file,"%lf\t",AB[ii*(*lab)+jj]);
       }
       fprintf(file,"\n");
     }
     fclose(file);
   }
-  else{
+  else
+  {
     perror(filename);
   }
 }

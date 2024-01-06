@@ -48,9 +48,9 @@ int main(int argc,char *argv[])
 
   printf("--------- Poisson 1D ---------\n\n");
   RHS    = (double *) malloc(sizeof(double)*la);
-  SOL    = (double *) calloc(la, sizeof(double)); 
   EX_SOL = (double *) malloc(sizeof(double)*la);
   X      = (double *) malloc(sizeof(double)*la);
+  SOL    = (double *) calloc(la,sizeof(double)); 
 
   /* Setup the Poisson 1D problem */
   /* General Band Storage */
@@ -81,15 +81,16 @@ int main(int argc,char *argv[])
   printf("Optimal alpha for simple Richardson iteration is : %lf",opt_alpha); 
 
   /* Solve */
-  double tol=1e-3;
-  int maxit=1000;
+  double tol = 1e-3;
+  int maxit = 1000;
   double *resvec;
-  int nbite=0;
+  int nbite = 0;
 
   resvec=(double *) calloc(maxit, sizeof(double));
 
   /* Solve with Richardson alpha */
-  if (IMPLEM == ALPHA) {
+  if (IMPLEM == ALPHA) 
+  {
     richardson_alpha(AB, RHS, SOL, &opt_alpha, &lab, &la, &ku, &kl, &tol, &maxit, resvec, &nbite);
   }
 
@@ -99,15 +100,20 @@ int main(int argc,char *argv[])
   kv = 1;
   ku = 1;
   kl = 1;
-  MB = (double *) malloc(sizeof(double)*(lab)*la);
-  if (IMPLEM == JAC) {
+  MB = (double *) malloc(sizeof(double)*lab*la);
+
+  if (IMPLEM == JAC) 
+  {
     extract_MB_jacobi_tridiag(AB, MB, &lab, &la, &ku, &kl, &kv);
-  } else if (IMPLEM == GS) {
+  } else if (IMPLEM == GS) 
+  {
     extract_MB_gauss_seidel_tridiag(AB, MB, &lab, &la, &ku, &kl, &kv);
   }
-
+  printf("\nMB Extract done \n");
+  
   /* Solve with General Richardson */
-  if (IMPLEM == JAC || IMPLEM == GS) {
+  if (IMPLEM == JAC || IMPLEM == GS) 
+  {
     write_GB_operator_colMajor_poisson1D(MB, &lab, &la, "MB.dat");
     richardson_MB(AB, RHS, SOL, MB, &lab, &la, &ku, &kl, &tol, &maxit, resvec, &nbite);
   }

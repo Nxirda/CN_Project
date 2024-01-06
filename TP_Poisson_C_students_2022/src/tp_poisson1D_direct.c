@@ -14,22 +14,20 @@ int main(int argc,char *argv[])
 /* ** argc: Nombre d'arguments */
 /* ** argv: Valeur des arguments */
 {
-  int ierr;
-  int jj;
-  int nbpoints, la;
-  int ku, kl, kv, lab;
-  int *ipiv;
+  int ierr = 0;
+  int jj = 0;
+
+  int nbpoints = 10;
+  int la = nbpoints -2;
+ 
   int info = 1;
-  int NRHS;
+  int NRHS = 1;
   int IMPLEM = 0;
 
-  double T0, T1;
-  double *RHS, *EX_SOL, *X;
+  double T0 = -5.0;
+  double T1 = 5.0;
   double **AAB;
-  double *AB;
 
-  //double temp, relres;
-  double relres;
 
   if (argc == 2) {
     IMPLEM = atoi(argv[1]);
@@ -38,16 +36,11 @@ int main(int argc,char *argv[])
     exit(1);
   }
 
-  NRHS     =1;
-  nbpoints =10;
-  la       =nbpoints-2;
-  T0       =-5.0;  
-  T1       =5.0;
 
   printf("--------- Poisson 1D ---------\n\n");
-  RHS   = (double *) malloc(sizeof(double)*la);
-  EX_SOL= (double *) malloc(sizeof(double)*la);
-  X     = (double *) malloc(sizeof(double)*la);
+  double* RHS   = (double *) malloc(sizeof(double)*la);
+  double* EX_SOL= (double *) malloc(sizeof(double)*la);
+  double* X     = (double *) malloc(sizeof(double)*la);
 
   // TODO : you have to implement those functions
   set_grid_points_1D(X, &la);
@@ -59,29 +52,23 @@ int main(int argc,char *argv[])
   write_vec(X, &la, "X_grid.dat");
 
   //Number of diagonals in ku and kl, kv is needed for LU decomposition
-  kv=1;
-  ku=1;
-  kl=1;
+  int kv=1;
+  int ku=1;
+  int kl=1;
 
   //Size of the matrix on the x axis (if col major)
-  lab=kv+kl+ku+1;
+  int lab=kv+kl+ku+1;
 
   //Actual Matrix
-  AB = (double *) malloc(sizeof(double)*lab*la);
+  double *AB = (double *) malloc(sizeof(double)*lab*la);
 
   //Store AB as a GB matrix
   set_GB_operator_colMajor_poisson1D(AB, &lab, &la, &kv);
   write_GB_operator_colMajor_poisson1D(AB, &lab, &la, "AB.dat");
 
-  //Store result of A*X in RHS
-  //cblas_dgbmv(CblasColMajor, CblasNoTrans, la, la, kl, ku, 1, AB, lab, X, 1, 1, RHS, 1);
-
-  //Write the result of dgbmv
-  //write_vec(RHS, &la, "RHS.dat");
   //Méthode de validation : erreur avant/erreur arrière
-
   printf("Solution with LAPACK\n");
-  ipiv = (int *) calloc(la, sizeof(int));
+  int *ipiv = (int *) calloc(la, sizeof(int));
 
   /* LU Factorization */
   if(IMPLEM == TRF)
@@ -94,8 +81,6 @@ int main(int argc,char *argv[])
   {
     dgbtrftridiag(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
   }
-
-  write_GB_operator_colMajor_poisson1D(AB, &lab, &la, "AB1_Facto.dat");
 
   /* Solution (Triangular) */
   if(IMPLEM == TRI || IMPLEM == TRF)
@@ -120,13 +105,12 @@ int main(int argc,char *argv[])
   {
     dgbsv_(&la, &kl, &ku, &NRHS, AB, &lab, ipiv, RHS, &la, &info);
   }
-  // TODO : use dgbsv
 
-  write_GB_operator_rowMajor_poisson1D(AB, &la, &la, "LU.dat");
+  write_GB_operator_rowMajor_poisson1D(AB, &lab, &la, "LU.dat");
   write_xy(RHS, X, &la, "SOL.dat");
 
   /* Relative forward error */
-  relres = relative_forward_error(RHS, EX_SOL, &la);
+  double relres = relative_forward_error(RHS, EX_SOL, &la);
   // TODO : Compute relative norm of the residual
   
   printf("\nThe relative forward error is relres = %e\n",relres);
@@ -135,5 +119,6 @@ int main(int argc,char *argv[])
   free(EX_SOL);
   free(X);
   free(AB);
+  free(ipiv);
   printf("\n\n--------- End -----------\n");
 }
