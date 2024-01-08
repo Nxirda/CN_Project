@@ -98,10 +98,10 @@ void extract_MB_gauss_seidel_tridiag(double *AB, double *MB, int *lab, int *la, 
 //
 void richardson_MB(double *AB, double *RHS, double *X, double *MB, int *lab, int *la, int *ku, int *kl, double *tol, int *maxit, double *resvec, int *nbite)
 {
+  int kub = 0;
   int info = 1;
   int NRHS = 1;
   int* ipiv = (int*)calloc((*la), sizeof(int));
-  int kub = 0;
   //On aura besoin de faire une Factorisation LU de M au début  
   dgbtrf_(la, la, kl, &kub, MB, lab, ipiv, &info);
 

@@ -26,7 +26,7 @@ int main(int argc,char *argv[])
   double *AB;
   double *MB;
   
-  double temp, relres;
+  double temp;
 
   double opt_alpha;
 
@@ -109,8 +109,7 @@ int main(int argc,char *argv[])
   {
     extract_MB_gauss_seidel_tridiag(AB, MB, &lab, &la, &ku, &kl, &kv);
   }
-  printf("\nMB Extract done \n");
-  
+
   /* Solve with General Richardson */
   if (IMPLEM == JAC || IMPLEM == GS) 
   {
@@ -123,6 +122,10 @@ int main(int argc,char *argv[])
 
   /* Write convergence history */
   write_vec(resvec, &nbite, "RESVEC.dat");
+
+  /* Relative forward error */
+  double relres = relative_forward_error(RHS, EX_SOL, &la);  
+  printf("\nThe relative forward error is relres = %e\n",relres); 
 
   free(resvec);
   free(RHS);

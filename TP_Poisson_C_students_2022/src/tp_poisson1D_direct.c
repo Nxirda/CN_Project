@@ -3,7 +3,12 @@
 /* This file contains the main function   */
 /* to solve the Poisson 1D problem        */
 /******************************************/
+//#define _POSIX_C_SOURCE 199309L
+
 #include "lib_poisson1D.h"
+#include "time.h"
+#include <stdlib.h>
+#include <unistd.h>
 
 //Constants
 #define TRF 0
@@ -28,6 +33,8 @@ int main(int argc,char *argv[])
   double T1 = 5.0;
   double **AAB;
 
+  double elapsed = 0.0;
+  struct timespec t1, t2;
 
   if (argc == 2) {
     IMPLEM = atoi(argv[1]);
@@ -73,13 +80,21 @@ int main(int argc,char *argv[])
   /* LU Factorization */
   if(IMPLEM == TRF)
   {
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     dgbtrf_(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t2);
+    elapsed = (double)(t2.tv_nsec - t1.tv_nsec);
+    printf(" - DGBTRF took        : %f s to run\n", elapsed);
   }
 
   /* LU for tridiagonal matrix  (can replace dgbtrf_) */
   if(IMPLEM == TRI)
   {
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     dgbtrftridiag(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t2);
+    elapsed = (double)(t2.tv_nsec - t1.tv_nsec);
+    printf(" - DGBTRFTRIDIAG took : %f s to run\n", elapsed);
   }
 
   /* Solution (Triangular) */
@@ -87,7 +102,12 @@ int main(int argc,char *argv[])
   {
     if (info==0)
     {
+      clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
       dgbtrs_("N", &la, &kl, &ku, &NRHS, AB, &lab, ipiv, RHS, &la, &info);
+      clock_gettime(CLOCK_MONOTONIC_RAW, &t2);
+      elapsed = (double)(t2.tv_nsec - t1.tv_nsec);
+      printf(" - DGBTRS took        : %f s to run\n", elapsed);
+
       if (info!=0)
       {
         printf("\n INFO DGBTRS = %d\n",info);
@@ -103,16 +123,18 @@ int main(int argc,char *argv[])
   /* It can also be solved with dgbsv */
   if(IMPLEM == SV)
   {
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1);
     dgbsv_(&la, &kl, &ku, &NRHS, AB, &lab, ipiv, RHS, &la, &info);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t2);
+    elapsed = (double)(t2.tv_nsec - t1.tv_nsec);
+    printf(" - DGBSV took         : %f s to run\n", elapsed);
   }
 
   write_GB_operator_rowMajor_poisson1D(AB, &lab, &la, "LU.dat");
   write_xy(RHS, X, &la, "SOL.dat");
 
   /* Relative forward error */
-  double relres = relative_forward_error(RHS, EX_SOL, &la);
-  // TODO : Compute relative norm of the residual
-  
+  double relres = relative_forward_error(RHS, EX_SOL, &la);  
   printf("\nThe relative forward error is relres = %e\n",relres);
 
   free(RHS);
