@@ -109,11 +109,11 @@ void richardson_MB(double *AB, double *RHS, double *X, double *MB, int *lab, int
   cblas_dcopy((*la), RHS, 1, Y, 1);
 
   //Compute residual
-  double residual = cblas_dnrm2((*la), Y, 1);
+  double residual = cblas_dnrm2((*la), RHS, 1);
 
   cblas_dgbmv(CblasColMajor, CblasNoTrans, *la, *la, *kl, *ku, 1, AB, *lab, X, 1, 1, Y, 1);
 
-  double norm_res = cblas_dnrm2((*la), RHS, 1);
+  double norm_res = cblas_dnrm2((*la), Y, 1);
   resvec[0] = norm_res/residual;
 
   while(cblas_dnrm2((*maxit), resvec, 1) > (*tol) && (*nbite) < (*maxit)) 

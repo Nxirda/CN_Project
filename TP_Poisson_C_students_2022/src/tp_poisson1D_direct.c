@@ -22,7 +22,7 @@ int main(int argc,char *argv[])
   int ierr = 0;
   int jj = 0;
 
-  int nbpoints = 10;
+  int nbpoints = 300;
   int la = nbpoints -2;
  
   int info = 1;
@@ -71,6 +71,7 @@ int main(int argc,char *argv[])
 
   //Store AB as a GB matrix
   set_GB_operator_colMajor_poisson1D(AB, &lab, &la, &kv);
+
   write_GB_operator_colMajor_poisson1D(AB, &lab, &la, "AB.dat");
 
   //Méthode de validation : erreur avant/erreur arrière
@@ -84,7 +85,7 @@ int main(int argc,char *argv[])
     dgbtrf_(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
     clock_gettime(CLOCK_MONOTONIC_RAW, &t2);
     elapsed = (double)(t2.tv_nsec - t1.tv_nsec);
-    printf(" - DGBTRF took        : %f s to run\n", elapsed);
+    printf(" - DGBTRF took        : %f nano seconds to run\n", elapsed);
   }
 
   /* LU for tridiagonal matrix  (can replace dgbtrf_) */
@@ -94,7 +95,7 @@ int main(int argc,char *argv[])
     dgbtrftridiag(&la, &la, &kl, &ku, AB, &lab, ipiv, &info);
     clock_gettime(CLOCK_MONOTONIC_RAW, &t2);
     elapsed = (double)(t2.tv_nsec - t1.tv_nsec);
-    printf(" - DGBTRFTRIDIAG took : %f s to run\n", elapsed);
+    printf(" - DGBTRFTRIDIAG took : %f nano seconds to run\n", elapsed);
   }
 
   /* Solution (Triangular) */
@@ -106,7 +107,7 @@ int main(int argc,char *argv[])
       dgbtrs_("N", &la, &kl, &ku, &NRHS, AB, &lab, ipiv, RHS, &la, &info);
       clock_gettime(CLOCK_MONOTONIC_RAW, &t2);
       elapsed = (double)(t2.tv_nsec - t1.tv_nsec);
-      printf(" - DGBTRS took        : %f s to run\n", elapsed);
+      printf(" - DGBTRS took        : %f nano seconds to run\n", elapsed);
 
       if (info!=0)
       {
@@ -127,7 +128,7 @@ int main(int argc,char *argv[])
     dgbsv_(&la, &kl, &ku, &NRHS, AB, &lab, ipiv, RHS, &la, &info);
     clock_gettime(CLOCK_MONOTONIC_RAW, &t2);
     elapsed = (double)(t2.tv_nsec - t1.tv_nsec);
-    printf(" - DGBSV took         : %f s to run\n", elapsed);
+    printf(" - DGBSV took         : %f nano seconds to run\n", elapsed);
   }
 
   write_GB_operator_rowMajor_poisson1D(AB, &lab, &la, "LU.dat");

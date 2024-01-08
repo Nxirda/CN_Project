@@ -109,9 +109,9 @@ double relative_forward_error(double* x, double* y, int* la)
   double x_norm = cblas_dnrm2((*la), x, 1);
   double y_norm = cblas_dnrm2((*la), y, 1);
   
-  double result = y_norm - x_norm;
+  double result = x_norm - y_norm;
 
-  result = result/y_norm;
+  result = result/x_norm;
   return result;
 }
 
@@ -131,16 +131,16 @@ int dgbtrftridiag(int *la, int*n, int *kl, int *ku, double *AB, int *lab, int *i
   }
   else
   {
-    
     //Compute base for upper diagonal
     AB[indexABCol(3,0,lab)] /= AB[indexABCol(2,0,lab)];
-    ipiv[0] = AB[indexABCol(2,0,lab)];
+    //ipiv[0] = AB[indexABCol(2,0,lab)];
 
     for(int k = 1; k < (*n); k++)
     {
       //Compute diag values
       AB[indexABCol(2,k,lab)] -= AB[indexABCol(1,k,lab)] * AB[indexABCol(3,k-1,lab)];
-      ipiv[k] = AB[indexABCol(2,k,lab)];
+
+      ipiv[k-1] = k;
       //Compute upper diag value
       AB[indexABCol(3,k,lab)] /= AB[indexABCol(2,k,lab)];
     }
